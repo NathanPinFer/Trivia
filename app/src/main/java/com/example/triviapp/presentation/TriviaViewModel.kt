@@ -17,10 +17,10 @@ class TriviaViewModel @Inject constructor(private val repository: TriviaReposito
     private val _triviaState = MutableStateFlow<TriviaState>(TriviaState.Loading)
     val triviaState: StateFlow<TriviaState> get() = _triviaState
 
-    fun getTriviaQuestions(category: Int, difficulty: String) {
+    fun getTriviaQuestions(idCategory: Int, difficulty: String) {
         viewModelScope.launch {
             _triviaState.value = TriviaState.Loading
-            val result = repository.getTriviaQuestionsFromRepository(category, difficulty)
+            val result = repository.getTriviaQuestionsFromRepository(idCategory, difficulty)
             _triviaState.value = when {
                 result.isSuccess -> TriviaState.Success(result.getOrNull() ?: emptyList())
                 result.isFailure -> TriviaState.Error(

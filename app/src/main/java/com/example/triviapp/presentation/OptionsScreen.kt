@@ -110,7 +110,7 @@ fun OptionsScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 onClick = {
                     triviaViewModel.getTriviaQuestions(
-                        getCategoryId(indexCategory),
+                        0,
                         getDifficulty(difficulties[indexDifficulty])
                     )
                     navController.navigate(Routes.TriviaScreen.route)

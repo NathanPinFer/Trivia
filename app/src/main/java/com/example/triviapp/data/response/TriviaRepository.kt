@@ -6,9 +6,9 @@ import javax.inject.Inject
 
 class TriviaRepository @Inject constructor(private val api: TriviaApiService) {
 
-    suspend fun getTriviaQuestionsFromRepository(category: Int, difficulty: String): Result<List<TriviaModel>> {
+    suspend fun getTriviaQuestionsFromRepository(idCategory: Int, difficulty: String): Result<List<TriviaModel>> {
         return try {
-            val response = api.getQuestions(category, difficulty)
+            val response = api.getQuestions(idCategory, difficulty)
             when (response.response_code) {
                 0 -> Result.success(response.results.map { questionResponse -> questionResponse.toPresentation() })
                 1 -> Result.failure(Exception("No Results: The API doesn't have enough questions for your query."))

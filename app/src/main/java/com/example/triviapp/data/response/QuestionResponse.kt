@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 data class QuestionResponse(
     @SerializedName("type") val type: String,
     @SerializedName("difficulty") val difficulty: String,
-    @SerializedName("category") val category: Int,
+    @SerializedName("category") val category: String,
     @SerializedName("question") val question: String,
     @SerializedName("correct_answer") val correct_answer: String,
     @SerializedName("incorrect_answers") val incorrect_answers: List<String>
