@@ -259,7 +259,7 @@ fun ConfirmButton(modifier: Modifier, onClick: () -> Unit, isEnabled: Boolean) {
 
 @Composable
 fun GameOverDialog(score: Int, onPlayAgain: () -> Unit) {
-    AlertDialog(onDismissRequest = { /*TODO*/ }, title = {
+    AlertDialog(onDismissRequest = {}, title = {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
