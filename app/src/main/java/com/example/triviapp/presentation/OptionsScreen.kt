@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.triviapp.presentation.model.Routes
 import kotlin.random.Random
@@ -41,7 +40,7 @@ import kotlin.random.Random
 @Composable
 fun OptionsScreen(
     navController: NavHostController,
-    triviaViewModel: TriviaViewModel = hiltViewModel()
+    triviaViewModel: TriviaViewModel
 ) {
     val categories = listOf(
         "Any",
@@ -71,37 +70,38 @@ fun OptionsScreen(
         "Cartoon & Animations"
     )
     val difficulties = listOf("Any", "Easy", "Medium", "Hard")
-    var indexCategory by rememberSaveable { mutableIntStateOf(0) }
-    var indexDifficulty by rememberSaveable { mutableIntStateOf(0) }
+    var selectedCategory by rememberSaveable { mutableStateOf("Any") }
+    var selectedDifficulty by rememberSaveable { mutableStateOf("Any") }
+
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 300.dp)
+            .padding(top = 350.dp)
     ) {
         Column(Modifier.fillMaxSize()) {
-            TitleOption(modifier = Modifier.padding(start = 70.dp), title = "Category:")
+            TitleOption(modifier = Modifier.padding(start = 90.dp), title = "Category:")
 
             Spacer(modifier = Modifier.size(5.dp))
 
             OptionSelector(modifier = Modifier.align(Alignment.CenterHorizontally),
-                option = categories, selectedOption = categories[indexCategory],
+                option = categories, selectedOption = selectedCategory,
                 onOptionSelected = { category ->
-                    indexCategory = category
+                    selectedCategory = category
                 })
 
             Spacer(modifier = Modifier.size(20.dp))
 
-            TitleOption(modifier = Modifier.padding(start = 70.dp), title = "Difficulty:")
+            TitleOption(modifier = Modifier.padding(start = 90.dp), title = "Difficulty:")
 
             Spacer(modifier = Modifier.size(5.dp))
 
             OptionSelector(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 option = difficulties,
-                selectedOption = difficulties[indexDifficulty],
+                selectedOption = selectedDifficulty,
                 onOptionSelected = { difficulty ->
-                    indexDifficulty = difficulty
+                    selectedDifficulty = difficulty
                 })
 
             Spacer(modifier = Modifier.size(30.dp))
@@ -109,10 +109,13 @@ fun OptionsScreen(
             PlayButton(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 onClick = {
-                    triviaViewModel.getTriviaQuestions(
-                        0,
-                        getDifficulty(difficulties[indexDifficulty])
-                    )
+                    val selectedCategoryId = getCategoryId(selectedCategory)
+                    val selectedFinalDifficulty = getDifficulty(selectedDifficulty)
+
+                    triviaViewModel.selectedCategoryId = selectedCategoryId
+                    triviaViewModel.selectedDifficulty = selectedFinalDifficulty
+
+                    triviaViewModel.fetchTrivia()
                     navController.navigate(Routes.TriviaScreen.route)
                 }
 
@@ -130,7 +133,7 @@ fun OptionSelector(
     modifier: Modifier,
     option: List<String>,
     selectedOption: String,
-    onOptionSelected: (Int) -> Unit
+    onOptionSelected: (String) -> Unit
 ) {
 
     var isExpanded by rememberSaveable { mutableStateOf(false) }
@@ -162,7 +165,7 @@ fun OptionSelector(
                                 }
                             },
                             onClick = {
-                                onOptionSelected(index)
+                                onOptionSelected(text)
                                 isExpanded = false
                             },
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -208,32 +211,32 @@ fun ScrollableColumn(
     }
 }
 
-fun getCategoryId(indexCategory: Int): Int {
-    return when (indexCategory) {
-        0 -> 0
-        1 -> 9
-        2 -> 10
-        3 -> 11
-        4 -> 12
-        5 -> 13
-        6 -> 14
-        7 -> 15
-        8 -> 16
-        9 -> 17
-        10 -> 18
-        11 -> 19
-        12 -> 20
-        13 -> 21
-        14 -> 22
-        15 -> 23
-        16 -> 24
-        17 -> 25
-        18 -> 26
-        19 -> 27
-        20 -> 28
-        21 -> 29
-        22 -> 30
-        23 -> 31
+fun getCategoryId(selectedCategory: String): Int {
+    return when (selectedCategory) {
+        "Any" -> 0
+        "General Knowledge" -> 9
+        "Books" -> 10
+        "Films" -> 11
+        "Music" -> 12
+        "Musical & Theatres" -> 13
+        "Television" -> 14
+        "Video Games" -> 15
+        "Board Games" -> 16
+        "Science & Nature" -> 17
+        "Computers" -> 18
+        "Mathematics" -> 19
+        "Mythology" -> 20
+        "Sports" -> 21
+        "Geography" -> 22
+        "History" -> 23
+        "Politics" -> 24
+        "Art" -> 25
+        "Celebrities" -> 26
+        "Animal" -> 27
+        "Vehicles" -> 28
+        "Animals" -> 29
+        "Gadgets" -> 30
+        "Anime & Manga" -> 31
         else -> 32
     }
 }

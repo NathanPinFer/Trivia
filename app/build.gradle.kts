@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.coil.compose)
     implementation(libs.dagger.hilt)
+    implementation (libs.androidx.activity.ktx)
+    implementation (libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.dagger.hilt.navigation)
     implementation(libs.androidx.runtime.livedata)
     kapt(libs.dagger.hilt.compiler)

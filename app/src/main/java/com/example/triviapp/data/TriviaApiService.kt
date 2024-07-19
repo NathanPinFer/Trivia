@@ -11,7 +11,7 @@ interface TriviaApiService {
     suspend fun getQuestions(
         @Query("category") idCategory: Int,
         @Query("difficulty") difficulty: String,
-        @Query("amount") amount: Int = 10,
+        @Query("amount") amount: Int = 5,
         @Query("type") type: String = "multiple"
     ): ResponseWrapper
 }
