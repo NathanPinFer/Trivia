@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +38,32 @@ import androidx.navigation.NavController
 import com.example.triviapp.data.response.TriviaState
 import com.example.triviapp.presentation.model.Routes
 import com.example.triviapp.presentation.model.TriviaModel
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 
+
+@Composable
+fun rememberWindowInfo(): com.example.triviapp.presentation.WindowInfo {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+
+    return WindowInfo(
+        screenWidthInfo = when {
+            screenWidth < 400.dp -> WindowType.Compact
+            screenWidth < 600.dp -> WindowType.Medium
+            else -> WindowType.Expanded
+        },
+        screenHeightInfo = when {
+            screenHeight < 480.dp -> WindowType.Compact
+            screenHeight < 900.dp -> WindowType.Medium
+            else -> WindowType.Expanded
+        },
+        screenWidth = screenWidth,
+        screenHeight = screenHeight
+    )
+}
 
 @Composable
 fun TriviaScreen(triviaViewModel: TriviaViewModel, navController: NavController) {
@@ -62,55 +87,74 @@ fun TriviaScreen(triviaViewModel: TriviaViewModel, navController: NavController)
 
 @Composable
 fun TriviaQuiz(state: TriviaState.QuestionState, triviaViewModel: TriviaViewModel) {
+    val windowInfo = rememberWindowInfo()
     val selectedAnswer by triviaViewModel.selectedAnswer.collectAsState()
     val preSelectedAnswer by triviaViewModel.preSelectedAnswer.collectAsState()
     val lives by triviaViewModel.lives.collectAsState()
 
     Box(Modifier.fillMaxSize()) {
         Column(
-            Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
+            Modifier.fillMaxSize()
+                .padding(top = 48.dp),
+            verticalArrangement = Arrangement.spacedBy(
+                when (windowInfo.screenHeightInfo) {
+                    WindowType.Compact -> 8.dp
+                    WindowType.Medium -> 16.dp
+                    WindowType.Expanded -> 24.dp
+                }
+            ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            LivesDisplay(
+                lives = lives,
+                modifier = Modifier.padding(
+                    top = when (windowInfo.screenHeightInfo) {
+                        WindowType.Compact -> 8.dp
+                        else -> 16.dp
+                    }
+                )
+            )
 
-            LivesDisplay(lives = lives)
-
-            Spacer(modifier = Modifier.size(60.dp))
-
-            QuestionCard(question = state.question)
-
-            Spacer(modifier = Modifier.size(30.dp))
+            QuestionCard(
+                question = state.question,
+                windowInfo = windowInfo
+            )
 
             GridAnswers(
                 allAnswers = state.question.incorrect_answers + state.question.correct_answer,
-                onAnswerSelected = { answer ->
-                    triviaViewModel.selectAnswer(answer)
-
-                },
+                onAnswerSelected = { answer -> triviaViewModel.selectAnswer(answer) },
                 selectedAnswer = state.selectedAnswer,
                 correctAnswer = if (state.isAnswered) state.question.correct_answer else null,
                 preSelectedAnswer = preSelectedAnswer,
-                isAnswered = state.isAnswered
+                isAnswered = state.isAnswered,
+                windowInfo = windowInfo
             )
-
-            Spacer(modifier = Modifier.size(20.dp))
 
             if (!state.isAnswered) {
                 ConfirmButton(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    modifier = Modifier.padding(
+                        bottom = when (windowInfo.screenHeightInfo) {
+                            WindowType.Compact -> 8.dp
+                            else -> 16.dp
+                        }
+                    ),
                     onClick = { triviaViewModel.confirmAnswer() },
-                    isEnabled = selectedAnswer != null
+                    isEnabled = selectedAnswer != null,
+                    windowInfo = windowInfo
                 )
             } else {
                 NextQuestionButton(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    modifier = Modifier.padding(
+                        bottom = when (windowInfo.screenHeightInfo) {
+                            WindowType.Compact -> 8.dp
+                            else -> 16.dp
+                        }
+                    ),
                     isEnabled = true,
-                    onClick = {
-                        triviaViewModel.nextQuestion()
-                    })
+                    onClick = { triviaViewModel.nextQuestion() },
+                    windowInfo = windowInfo
+                )
             }
-
-
         }
     }
 }
@@ -123,55 +167,85 @@ fun GridAnswers(
     preSelectedAnswer: String?,
     selectedAnswer: String?,
     correctAnswer: String?,
-    isAnswered: Boolean
+    isAnswered: Boolean,
+    windowInfo: com.example.triviapp.presentation.WindowInfo
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(
+            when (windowInfo.screenWidthInfo) {
+                WindowType.Compact -> 8.dp
+                WindowType.Medium -> 12.dp
+                WindowType.Expanded -> 16.dp
+            }
+        ),
+        verticalArrangement = Arrangement.spacedBy(
+            when (windowInfo.screenHeightInfo) {
+                WindowType.Compact -> 8.dp
+                WindowType.Medium -> 12.dp
+                WindowType.Expanded -> 16.dp
+            }
+        ),
+        modifier = Modifier.padding(8.dp)
     ) {
         items(allAnswers.size) { index ->
             val answer = allAnswers[index]
             AnswerCard(
                 answer = answer,
-                onAnswerSelected = {
-                    onAnswerSelected(answer)
-                }, isEnabled = !isAnswered,
+                onAnswerSelected = { onAnswerSelected(answer) },
+                isEnabled = !isAnswered,
                 isPreselected = answer == preSelectedAnswer,
                 isSelected = answer == selectedAnswer,
                 isCorrect = answer == correctAnswer,
-                showResult = isAnswered
+                showResult = isAnswered,
+                windowInfo = windowInfo
             )
         }
     }
 }
 
 @Composable
-fun QuestionCard(question: TriviaModel?) {
+fun QuestionCard(
+    question: TriviaModel?,
+    windowInfo: com.example.triviapp.presentation.WindowInfo
+) {
     if (question == null) {
-        Text(text = "No questions avaliable")
+        Text(text = "No questions available")
     } else {
-        Box(
+        ElevatedCard(
             modifier = Modifier
+                .height(
+                    when (windowInfo.screenHeightInfo) {
+                        WindowType.Compact -> 120.dp
+                        WindowType.Medium -> 160.dp
+                        WindowType.Expanded -> 200.dp
+                    }
+                )
+                .fillMaxWidth(
+                    when (windowInfo.screenWidthInfo) {
+                        WindowType.Compact -> 0.95f
+                        WindowType.Medium -> 0.9f
+                        WindowType.Expanded -> 0.85f
+                    }
+                )
         ) {
-            ElevatedCard(
-                modifier = Modifier
-                    .height(200.dp)
-                    .width(380.dp)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = question.question,
-                        Modifier.padding(24.dp),
-                        fontSize = 24.sp
-                    )
-                }
-
+                Text(
+                    text = question.question,
+                    Modifier.padding(16.dp),
+                    fontSize = when (windowInfo.screenWidthInfo) {
+                        WindowType.Compact -> 18.sp
+                        WindowType.Medium -> 20.sp
+                        WindowType.Expanded -> 24.sp
+                    },
+                    textAlign = TextAlign.Center
+                )
             }
         }
-
     }
-
 }
 
 @Composable
@@ -183,10 +257,9 @@ fun AnswerCard(
     isPreselected: Boolean,
     isSelected: Boolean,
     isCorrect: Boolean,
-    showResult: Boolean
+    showResult: Boolean,
+    windowInfo: com.example.triviapp.presentation.WindowInfo
 ) {
-
-
     val backgroundColor = when {
         showResult && isCorrect -> Color.Green.copy(alpha = 0.3f)
         showResult && isSelected -> Color.Red.copy(alpha = 0.3f)
@@ -203,22 +276,38 @@ fun AnswerCard(
 
     ElevatedCard(
         modifier = modifier
-            .height(180.dp)
-            .width(200.dp)
+            .fillMaxWidth()
+            .aspectRatio(
+                when (windowInfo.screenHeightInfo) {
+                    WindowType.Compact -> 1.5f
+                    WindowType.Medium -> 1.3f
+                    WindowType.Expanded -> 1.1f
+                }
+            )
             .border(borderWidth, borderColor, shape = RoundedCornerShape(12.dp)),
         colors = CardDefaults.elevatedCardColors(
             containerColor = backgroundColor,
             disabledContainerColor = backgroundColor
         ),
-        onClick = onAnswerSelected, enabled = isEnabled && !showResult,
-
+        onClick = onAnswerSelected,
+        enabled = isEnabled && !showResult,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
                 text = answer,
-                Modifier.padding(24.dp),
+                modifier = Modifier.padding(8.dp),
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
+                fontSize = when (windowInfo.screenWidthInfo) {
+                    WindowType.Compact -> 16.sp
+                    WindowType.Medium -> 20.sp
+                    WindowType.Expanded -> 24.sp
+                },
+                textAlign = TextAlign.Center,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -239,21 +328,47 @@ fun ErrorMessage(message: String) {
 }
 
 @Composable
-fun NextQuestionButton(modifier: Modifier, onClick: () -> Unit, isEnabled: Boolean) {
-    Column(modifier = modifier) {
-        TextButton(onClick = onClick, enabled = isEnabled) {
-            Text(text = "Next Question!", fontSize = 45.sp)
-        }
+fun NextQuestionButton(
+    modifier: Modifier,
+    onClick: () -> Unit,
+    isEnabled: Boolean,
+    windowInfo: com.example.triviapp.presentation.WindowInfo
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = isEnabled,
+        modifier = modifier
+    ) {
+        Text(
+            text = "Next Question!",
+            fontSize = when (windowInfo.screenWidthInfo) {
+                WindowType.Compact -> 24.sp
+                WindowType.Medium -> 32.sp
+                WindowType.Expanded -> 45.sp
+            }
+        )
     }
-
 }
-
 @Composable
-fun ConfirmButton(modifier: Modifier, onClick: () -> Unit, isEnabled: Boolean) {
-    Column(modifier = modifier) {
-        TextButton(onClick = onClick, enabled = isEnabled) {
-            Text(text = "Confirm", fontSize = 45.sp)
-        }
+fun ConfirmButton(
+    modifier: Modifier,
+    onClick: () -> Unit,
+    isEnabled: Boolean,
+    windowInfo: com.example.triviapp.presentation.WindowInfo
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = isEnabled,
+        modifier = modifier
+    ) {
+        Text(
+            text = "Confirm",
+            fontSize = when (windowInfo.screenWidthInfo) {
+                WindowType.Compact -> 24.sp
+                WindowType.Medium -> 32.sp
+                WindowType.Expanded -> 45.sp
+            }
+        )
     }
 }
 
@@ -275,8 +390,10 @@ fun GameOverDialog(score: Int, onPlayAgain: () -> Unit) {
 }
 
 @Composable
-fun LivesDisplay(lives: Int) {
+fun LivesDisplay(lives: Int, modifier: Modifier = Modifier) {
+    val windowInfo = rememberWindowInfo()
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -284,11 +401,21 @@ fun LivesDisplay(lives: Int) {
             imageVector = Icons.Default.Favorite,
             contentDescription = "Lives",
             tint = Color.Red,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(
+                when (windowInfo.screenWidthInfo) {
+                    WindowType.Compact -> 32.dp
+                    WindowType.Medium -> 40.dp
+                    WindowType.Expanded -> 48.dp
+                }
+            )
         )
         Text(
             text = lives.toString(),
-            fontSize = 36.sp,
+            fontSize = when (windowInfo.screenWidthInfo) {
+                WindowType.Compact -> 24.sp
+                WindowType.Medium -> 30.sp
+                WindowType.Expanded -> 36.sp
+            },
             fontWeight = FontWeight.Bold
         )
     }

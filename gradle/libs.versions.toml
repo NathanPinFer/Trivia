@@ -1,19 +1,19 @@
 [versions]
-activityKtx = "1.9.0"
-agp = "8.5.1"
+activityKtx = "1.9.3"
+agp = "8.5.2"
 coilCompose = "2.6.0"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.3"
-activityCompose = "1.9.0"
-composeBom = "2024.06.00"
+lifecycleRuntimeKtx = "2.8.6"
+activityCompose = "1.9.3"
+composeBom = "2024.10.00"
 hilt = "2.51.1"
 retrofit = "2.11.0"
 hiltNavigationCompose = "1.2.0"
-runtimeLivedata = "1.6.8"
+runtimeLivedata = "1.7.4"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
