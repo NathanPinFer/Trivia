@@ -4,9 +4,11 @@ package com.example.triviapp.presentation
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,7 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 
 
 @Composable
-fun rememberWindowInfo(): com.example.triviapp.presentation.WindowInfo {
+fun rememberWindowInfo(): WindowInfo {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
@@ -94,13 +96,14 @@ fun TriviaQuiz(state: TriviaState.QuestionState, triviaViewModel: TriviaViewMode
 
     Box(Modifier.fillMaxSize()) {
         Column(
-            Modifier.fillMaxSize()
+            Modifier
+                .fillMaxSize()
                 .padding(top = 48.dp),
             verticalArrangement = Arrangement.spacedBy(
                 when (windowInfo.screenHeightInfo) {
                     WindowType.Compact -> 8.dp
-                    WindowType.Medium -> 16.dp
-                    WindowType.Expanded -> 24.dp
+                    WindowType.Medium -> 18.dp
+                    WindowType.Expanded -> 29.dp
                 }
             ),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -133,6 +136,7 @@ fun TriviaQuiz(state: TriviaState.QuestionState, triviaViewModel: TriviaViewMode
             if (!state.isAnswered) {
                 ConfirmButton(
                     modifier = Modifier.padding(
+                        top = 16.dp,
                         bottom = when (windowInfo.screenHeightInfo) {
                             WindowType.Compact -> 8.dp
                             else -> 16.dp
@@ -145,6 +149,7 @@ fun TriviaQuiz(state: TriviaState.QuestionState, triviaViewModel: TriviaViewMode
             } else {
                 NextQuestionButton(
                     modifier = Modifier.padding(
+                        top = 16.dp,
                         bottom = when (windowInfo.screenHeightInfo) {
                             WindowType.Compact -> 8.dp
                             else -> 16.dp
@@ -168,22 +173,23 @@ fun GridAnswers(
     selectedAnswer: String?,
     correctAnswer: String?,
     isAnswered: Boolean,
-    windowInfo: com.example.triviapp.presentation.WindowInfo
+    windowInfo: WindowInfo
+
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(
             when (windowInfo.screenWidthInfo) {
                 WindowType.Compact -> 8.dp
-                WindowType.Medium -> 12.dp
+                WindowType.Medium -> 18.dp
                 WindowType.Expanded -> 16.dp
             }
         ),
         verticalArrangement = Arrangement.spacedBy(
             when (windowInfo.screenHeightInfo) {
-                WindowType.Compact -> 8.dp
-                WindowType.Medium -> 12.dp
-                WindowType.Expanded -> 16.dp
+                WindowType.Compact -> 6.dp
+                WindowType.Medium -> 8.dp
+                WindowType.Expanded -> 14.dp
             }
         ),
         modifier = Modifier.padding(8.dp)
@@ -207,7 +213,7 @@ fun GridAnswers(
 @Composable
 fun QuestionCard(
     question: TriviaModel?,
-    windowInfo: com.example.triviapp.presentation.WindowInfo
+    windowInfo: WindowInfo
 ) {
     if (question == null) {
         Text(text = "No questions available")
@@ -258,7 +264,7 @@ fun AnswerCard(
     isSelected: Boolean,
     isCorrect: Boolean,
     showResult: Boolean,
-    windowInfo: com.example.triviapp.presentation.WindowInfo
+    windowInfo: WindowInfo
 ) {
     val backgroundColor = when {
         showResult && isCorrect -> Color.Green.copy(alpha = 0.3f)
@@ -277,6 +283,7 @@ fun AnswerCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
+            .padding(bottom = 4.dp)
             .aspectRatio(
                 when (windowInfo.screenHeightInfo) {
                     WindowType.Compact -> 1.5f
@@ -298,7 +305,7 @@ fun AnswerCard(
         ) {
             Text(
                 text = answer,
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(4.dp),
                 fontWeight = FontWeight.Bold,
                 fontSize = when (windowInfo.screenWidthInfo) {
                     WindowType.Compact -> 16.sp
@@ -311,6 +318,8 @@ fun AnswerCard(
             )
         }
     }
+
+
 }
 
 
@@ -332,7 +341,7 @@ fun NextQuestionButton(
     modifier: Modifier,
     onClick: () -> Unit,
     isEnabled: Boolean,
-    windowInfo: com.example.triviapp.presentation.WindowInfo
+    windowInfo: WindowInfo
 ) {
     TextButton(
         onClick = onClick,
@@ -342,19 +351,20 @@ fun NextQuestionButton(
         Text(
             text = "Next Question!",
             fontSize = when (windowInfo.screenWidthInfo) {
-                WindowType.Compact -> 24.sp
-                WindowType.Medium -> 32.sp
-                WindowType.Expanded -> 45.sp
+                WindowType.Compact -> 31.sp
+                WindowType.Medium -> 40.sp
+                WindowType.Expanded -> 50.sp
             }
         )
     }
 }
+
 @Composable
 fun ConfirmButton(
     modifier: Modifier,
     onClick: () -> Unit,
     isEnabled: Boolean,
-    windowInfo: com.example.triviapp.presentation.WindowInfo
+    windowInfo: WindowInfo
 ) {
     TextButton(
         onClick = onClick,
@@ -364,9 +374,9 @@ fun ConfirmButton(
         Text(
             text = "Confirm",
             fontSize = when (windowInfo.screenWidthInfo) {
-                WindowType.Compact -> 24.sp
-                WindowType.Medium -> 32.sp
-                WindowType.Expanded -> 45.sp
+                WindowType.Compact -> 31.sp
+                WindowType.Medium -> 40.sp
+                WindowType.Expanded -> 50.sp
             }
         )
     }
